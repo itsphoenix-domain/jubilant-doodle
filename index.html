@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>What's Missing? 👻</title>
+<style>
+:root{--bg:#1b0f2e;--bg2:#2d1650;--card:#3a2063;--ac:#ff8a1f;--tx:#fff4e0;--mu:#c9b6e8;--ok:#5be38b;--bad:#ff6b7a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 0,var(--bg2),var(--bg) 70%) fixed;color:var(--tx);font-family:"Baloo 2","Trebuchet MS","Segoe UI",system-ui,sans-serif;text-align:center}
+#app{max-width:900px;margin:0 auto;padding:16px}
+h1{font-size:clamp(2.2rem,8vw,4rem);margin:.2em 0;color:var(--ac);text-shadow:0 4px 0 #7a2f00,0 8px 20px #0008}
+h2{margin:.3em 0}p{color:var(--mu)}
+.big{font-size:clamp(3rem,12vw,6rem);animation:float 3s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-10px) rotate(4deg)}}
+@keyframes pop{from{transform:scale(0) rotate(-20deg);opacity:0}to{transform:none;opacity:1}}
+@keyframes vanish{to{transform:scale(.2) rotate(90deg);opacity:0}}
+button,select,input,textarea{font:inherit}
+.btn{background:var(--ac);color:#2b1200;border:0;border-radius:999px;padding:.7em 1.4em;margin:6px;font-weight:700;font-size:1.1rem;cursor:pointer;box-shadow:0 5px 0 #a34a00,0 10px 20px #0006;transition:transform .1s}
+.btn:active{transform:translateY(3px)}
+.btn.alt{background:var(--card);color:var(--tx);box-shadow:0 5px 0 #1d0f38,0 10px 20px #0006}
+.btn.on{outline:3px solid var(--ac)}
+.panel{background:var(--card);border-radius:22px;padding:16px;margin:12px 0;box-shadow:0 8px 24px #0006;text-align:left}
+.panel label{display:block;margin:10px 0 2px;color:var(--mu)}
+.panel input[type=range]{width:100%;accent-color:var(--ac)}
+.panel input[type=text],.panel textarea,.panel select{width:100%;padding:.6em;border-radius:12px;border:2px solid #5a3a92;background:var(--bg);color:var(--tx)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:12px;margin:16px 0}
+.card{background:var(--card);border-radius:20px;padding:14px 6px;box-shadow:0 6px 16px #0007;animation:pop .45s backwards;font-weight:700}
+.card .e{font-size:clamp(2.2rem,9vw,3.6rem);display:block}
+.card.hid{animation:vanish .6s forwards}
+.q{font-size:3rem}
+.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px}
+.pill{background:var(--card);border-radius:999px;padding:.3em .9em;font-weight:700}
+.bar{height:12px;background:var(--bg);border-radius:9px;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;background:var(--ac);transition:width .1s linear}
+.count{font-size:clamp(3rem,14vw,6rem);color:var(--ac);font-weight:800}
+.choice{min-width:105px}
+#ov{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;z-index:9;padding:16px}
+#ov>div{background:var(--bg2);border:4px solid var(--ac);border-radius:28px;padding:22px;max-width:420px;width:100%;animation:pop .5s}
+.ok{color:var(--ok)}.no{color:var(--bad)}
+.row{display:flex;justify-content:space-between;padding:.3em 0;border-bottom:1px dashed #5a3a92}
+</style></head><body><div id="app"></div><div id="ovh"></div>
+<script>
+const CATS={
+objects:['🎃 Pumpkin','🧙 Witch Hat|🎩','🕯️ Candle','🔮 Crystal Ball','🗝️ Key','📜 Scroll','🍎 Candy Apple','🪦 Gravestone','🕸️ Cobweb','🦴 Bone','🧹 Broom','🪄 Wand'],
+characters:['👻 Ghost','🧟 Zombie','🧛 Vampire','🧙 Witch','💀 Skeleton','👽 Alien','🤡 Clown','🦸 Superhero','🧚 Fairy','🐉 Dragon','🤖 Robot','🎭 Mask'],
+candy:['🍬 Candy','🍭 Lollipop','🍫 Chocolate','🍪 Cookie','🧁 Cupcake','🍩 Donut','🍿 Popcorn','🍮 Pudding','🍡 Gummy','🍯 Honey','🥧 Pie','🍦 Ice Cream'],
+creatures:['🦇 Bat','🕷️ Spider','🐈‍⬛ Black Cat','🦉 Owl','🐍 Snake','🐺 Wolf','🐸 Frog','🦂 Scorpion','🐀 Rat','🐛 Worm','🦎 Lizard','🐙 Octopus'],
+magic:['🧪 Potion','📖 Spellbook','🪄 Wand','🔮 Crystal Ball','🧹 Broom','🐸 Frog','⭐ Star','🌙 Moon','🕯️ Candle','🍄 Mushroom','🫖 Cauldron','🧿 Charm'],
+haunted:['🏚️ Haunted House','🪦 Gravestone','🚪 Door','🕯️ Candle','🕸️ Cobweb','🖼️ Portrait','🪞 Mirror','⚰️ Coffin','🌕 Full Moon','🌳 Spooky Tree','🔦 Flashlight','🛏️ Bed']};
+const CN={objects:'🎃 Halloween Objects',characters:'👻 Halloween Characters',candy:'🍬 Halloween Candy',creatures:'🦇 Spooky Creatures',magic:'🧙 Witch & Magic',haunted:'🏚️ Haunted House',mixed:'🎲 Mixed Halloween',custom:'✏️ Custom Items'};
+const parse=s=>{s=s.split('|')[0].trim();const m=s.match(/^(\S+)\s+(.+)$/);return m&&/[^\x00-\x7F]/.test(m[1])?{e:m[1],n:m[2]}:{e:'🎁',n:s}};
+const D={mode:'kids',cat:'mixed',count:5,mem:9,ans:15,rounds:6,type:'choice',sound:true,players:'Player 1',custom:[]};
+let S=Object.assign({},D);
+try{Object.assign(S,JSON.parse(localStorage.getItem('wm_s')||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem('wm_s',JSON.stringify(S))}catch(e){}};
+const $=id=>document.getElementById(id),app=$('app');
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+let AC;function tone(f,d=.12,t='sine'){if(!S.sound)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type=t;o.frequency.value=f;g.gain.value=.12;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);o.stop(AC.currentTime+d)}catch(e){}}
+const PRE={kids:{count:5,mem:9,ans:15},challenge:{count:8,mem:6,ans:10}};
+const names=()=>{const n=S.players.split(',').map(x=>x.trim()).filter(Boolean);return n.length?n:['Player 1']};
+let G=null,TM=null,last='';
+function pool(){let a=[];if(S.cat==='custom')a=S.custom.map(parse);else if(S.cat==='mixed')a=Object.values(CATS).flat().map(parse);else a=CATS[S.cat].map(parse);const seen={};return a.filter(x=>!seen[x.n.toLowerCase()]&&(seen[x.n.toLowerCase()]=1))}
+function home(){clearInterval(TM);G=null;app.innerHTML=`<div class="big">🎃</div><h1>What's Missing?</h1><p style="font-size:1.3rem">Can you spot what disappeared? 👻</p>
+<div><button class="btn" onclick="start()">🎃 Start Game</button></div><div><button class="btn alt" onclick="settings()">⚙️ Game Settings</button></div><div><button class="btn alt" onclick="howto()">📖 How to Play</button></div>
+<p>${S.mode==='kids'?'🧒 Kids Mode':S.mode==='challenge'?'👻 Challenge Mode':'🧙 Custom Mode'} · ${CN[S.cat]} · ${S.rounds} rounds</p><p style="font-size:2rem">🦇 🕷️ 🍬 🧙 👻</p>`}
+function howto(){modal(`<h2>📖 How to Play</h2><p style="color:var(--tx);text-align:left">1. Memorize all the spooky objects before time runs out.<br>2. They hide, and one sneaks away!<br>3. Pick (or type) what's missing.<br>4. +1 point for a correct answer, +1 bonus if you're quick (answer within the first half of the timer).<br>Take turns — each round belongs to the next player or team.</p><button class="btn" onclick="closeM()">Got it!</button>`)}
+function modal(h){$('ovh').innerHTML=`<div id="ov"><div>${h}</div></div>`}
+function closeM(){$('ovh').innerHTML=''}
+function settings(){const sl=(k,l,mn,mx)=>`<label>${l}: <b id="v_${k}">${S[k]}</b></label><input type="range" min="${mn}" max="${mx}" value="${S[k]}" oninput="set('${k}',+this.value);$('v_${k}').textContent=this.value">`;
+app.innerHTML=`<h2>⚙️ Game Settings</h2><div class="panel"><b>Mode</b><div style="text-align:center">
+<button class="btn alt ${S.mode==='kids'?'on':''}" onclick="mode('kids')">🧒 Kids (6+)</button><button class="btn alt ${S.mode==='challenge'?'on':''}" onclick="mode('challenge')">👻 Challenge (10+)</button><button class="btn alt ${S.mode==='custom'?'on':''}" onclick="mode('custom')">🧙 Custom</button></div>
+<label>Category</label><select onchange="set('cat',this.value)">${Object.keys(CN).map(k=>`<option value="${k}" ${S.cat===k?'selected':''}>${CN[k]}</option>`).join('')}</select>
+${sl('count','Number of objects',3,12)}${sl('mem','Memorization time (sec)',3,20)}${sl('ans','Answer time (sec)',5,30)}${sl('rounds','Number of rounds',1,20)}
+<label>Answer style</label><select onchange="set('type',this.value)"><option value="choice" ${S.type==='choice'?'selected':''}>Tap the missing item</option><option value="type" ${S.type==='type'?'selected':''}>Type the answer</option></select>
+<label>Players or teams (comma separated)</label><input type="text" value="${S.players}" onchange="set('players',this.value)">
+<label>Custom items — one per line, e.g. "🍎 Apple" (saved in this browser)</label><textarea rows="5" onchange="set('custom',this.value.split('\\n').map(x=>x.trim()).filter(Boolean))">${S.custom.join('\n')}</textarea>
+<label><input type="checkbox" ${S.sound?'checked':''} onchange="set('sound',this.checked)"> 🔊 Sound effects</label></div>
+<button class="btn" onclick="home()">✅ Done</button><button class="btn alt" onclick="if(confirm('Reset everything?')){S=Object.assign({},D);save();settings()}">🗑️ Reset</button>`}
+function set(k,v){S[k]=v;if(['count','mem','ans'].includes(k)&&S.mode!=='custom')S.mode='custom';save()}
+function mode(m){S.mode=m;if(PRE[m])Object.assign(S,PRE[m]);save();settings()}
+function start(){const p=pool();if(p.length<3){alert('Add at least 3 custom items in Settings first!');return settings()}
+const ps=names();G={r:0,ps,sc:ps.map(()=>0),ok:ps.map(()=>0),n:Math.min(S.count,p.length)};next()}
+function next(){closeM();if(G.r>=S.rounds)return over();G.r++;round()}
+function round(){closeM();clearInterval(TM);const p=pool();let it,key,t=0;do{it=shuf(p).slice(0,G.n);key=it.map(x=>x.n).sort().join()}while(key===last&&p.length>G.n&&t++<9);last=key;
+G.items=it;G.miss=it[Math.random()*it.length|0];G.rem=it.filter(x=>x!==G.miss);G.ph='mem';G.t=S.mem;G.max=S.mem;G.pause=false;G.done=false;draw();TM=setInterval(tick,100)}
+function tick(){if(G.pause||G.ph==='rev')return;G.t=Math.max(0,G.t-.1);const b=$('bar'),c=$('cnt');if(b)b.style.width=G.t/G.max*100+'%';if(c)c.textContent=Math.ceil(G.t);if(Math.abs(G.t-Math.round(G.t))<.05&&G.t>0&&G.ph!=='hide')tone(G.ph==='mem'?440:330,.05);
+if(G.t>0)return;if(G.ph==='mem'){G.ph='hide';G.t=G.max=1.6;draw();tone(200,.3,'triangle')}else if(G.ph==='hide'){G.ph='ans';G.t=G.max=S.ans;G.show=shuf(G.rem);G.opts=shuf(G.items);draw()}else if(G.ph==='ans')answer(null)}
+const cardH=(x,d)=>`<div class="card" style="animation-delay:${d*.06}s"><span class="e">${x.e}</span>${x.n}</div>`;
+function draw(){const P=G.ps[(G.r-1)%G.ps.length],i=(G.r-1)%G.ps.length;let h=`<div class="top"><span class="pill">${P}: ${G.sc[i]} 🎃</span><span class="pill">Round ${G.r}/${S.rounds}</span></div>
+<div class="top"><button class="btn alt" onclick="pz()">${G.pause?'▶️':'⏸️'}</button><button class="btn alt" onclick="round()">🔄</button><button class="btn alt" onclick="next()">➡️</button><button class="btn alt" onclick="S.sound=!S.sound;save();draw()">${S.sound?'🔊':'🔇'}</button><button class="btn alt" onclick="home()">🏠</button></div><div class="bar"><i id="bar" style="width:${G.t/G.max*100}%"></i></div>`;
+if(G.ph==='mem')h+=`<h2>MEMORIZE!</h2><div class="count" id="cnt">${Math.ceil(G.t)}</div><div class="grid">${G.items.map((x,k)=>cardH(x,k)).join('')}</div>`;
+else if(G.ph==='hide')h+=`<h2>Poof! 💨</h2><div class="grid">${G.items.map(()=>`<div class="card hid"><span class="q">❓</span></div>`).join('')}</div>`;
+else if(G.ph==='ans'){h+=`<h2>WHAT'S MISSING? 👀</h2><div class="count" id="cnt">${Math.ceil(G.t)}</div><div class="grid">${G.show.map((x,k)=>cardH(x,k)).join('')}</div>`;
+h+=S.type==='choice'?`<div class="grid">${G.opts.map(x=>`<button class="btn alt choice" onclick="answer('${x.n.replace(/'/g,"\\'")}')">${x.e}<br>${x.n}</button>`).join('')}</div>`:`<input id="ti" type="text" placeholder="Type the missing item…" style="padding:.7em;border-radius:14px;border:2px solid var(--ac);font-size:1.2rem;width:min(90%,340px);background:var(--bg);color:var(--tx)" onkeydown="if(event.key==='Enter')answer($('ti').value)"><div><button class="btn" onclick="answer($('ti').value)">Submit</button></div>`}
+app.innerHTML=h;if(G.ph==='ans'&&S.type==='type'&&$('ti'))$('ti').focus()}
+function pz(){G.pause=!G.pause;draw()}
+function answer(a){if(G.pause||G.ph==='rev')return;const i=(G.r-1)%G.ps.length,ok=a!==null&&a.trim().toLowerCase()===G.miss.n.toLowerCase(),bonus=ok&&G.t>=G.max/2;G.ph='rev';clearInterval(TM);
+if(ok){G.sc[i]+=1+(bonus?1:0);G.ok[i]++;[523,659,784].forEach((f,k)=>setTimeout(()=>tone(f,.15),k*110))}else tone(150,.4,'sawtooth');
+const last=G.r>=S.rounds;modal(`${ok?`<h2 class="ok">🎃 YOU FOUND IT! 🎃</h2><div class="big">${G.miss.e}</div>`:`<h2 class="no">❌ Not quite!</h2><div class="big">${G.miss.e}</div>`}<h2>The missing item was: ${G.miss.e} ${G.miss.n.toUpperCase()}</h2><p>${ok?(bonus?'+2 points (quick bonus!)':'+1 point'):'0 points'} · ${G.ps[i]}: <b>${G.sc[i]} 🎃</b></p><button class="btn" onclick="next()">${last?'🏆 Finish':'➡️ Next Round'}</button>`)}
+function over(){clearInterval(TM);const mx=Math.max(...G.sc),w=G.ps.filter((_,i)=>G.sc[i]===mx);
+app.innerHTML=`<div class="big">🏆</div><h1>🎃 GAME OVER! 🎃</h1><div class="panel">${G.ps.map((p,i)=>`<div class="row"><span>${p}</span><span>${G.sc[i]} pts · ${G.ok[i]} correct</span></div>`).join('')}</div><p>Rounds played: ${S.rounds} · Correct answers: ${G.ok.reduce((a,b)=>a+b,0)}</p><h2>👑 ${G.ps.length>1?(w.length>1?'Tie: '+w.join(' & '):'Winner: '+w[0]):'Great job, '+w[0]+'!'}</h2>
+<button class="btn" onclick="start()">🔄 Play Again</button><button class="btn alt" onclick="settings()">⚙️ Change Settings</button><button class="btn alt" onclick="home()">🏠 Main Menu</button>`;[523,659,784,1046].forEach((f,k)=>setTimeout(()=>tone(f,.2),k*150))}
+home();
+</script></body></html>
